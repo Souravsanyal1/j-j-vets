@@ -11,6 +11,18 @@
     --text-muted: #5c403f;
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.3);
+    --card-shadow: 0 10px 30px rgba(45, 41, 38, 0.05);
+}
+
+[data-theme="dark"] {
+    --background: #0f1112;
+    --surface: #1a1d1e;
+    --text-main: #f0f1f2;
+    --text-muted: #e1e3e4;
+    --secondary: #f8f9fa;
+    --glass-bg: rgba(26, 29, 30, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -86,3 +98,41 @@ body {
 .hero-overlay {
     background: linear-gradient(to right, rgba(25, 28, 29, 0.8) 0%, rgba(25, 28, 29, 0.4) 100%);
 }
+
+/* Parallax Effect */
+.parallax-bg {
+    transform: translateY(calc(var(--scroll) * 0.5px));
+}
+
+/* Accordion Styles */
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-item.active .accordion-content {
+    max-height: 500px;
+}
+
+.accordion-item.active .accordion-icon {
+    transform: rotate(180deg);
+}
+
+/* FAB */
+.fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 100;
+}
+
+/* Smooth Theme Transition */
+body {
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.glass-nav, .glass-card {
+    transition: background-color 0.4s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
