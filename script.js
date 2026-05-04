@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Preloader
+    const preloader = document.getElementById('preloader');
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (preloader) {
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+            }
+        }, 800);
+    });
+
     // Parallax & Scroll setup
     window.addEventListener('scroll', () => {
         document.documentElement.style.setProperty('--scroll', window.pageYOffset);
@@ -46,15 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
         header.addEventListener('click', () => {
             const item = header.parentElement;
             const isActive = item.classList.contains('active');
-            
-            // Close all other items
             document.querySelectorAll('.accordion-item').forEach(otherItem => {
                 otherItem.classList.remove('active');
             });
-
-            if (!isActive) {
-                item.classList.add('active');
-            }
+            if (!isActive) item.classList.add('active');
         });
     });
 
@@ -69,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Smooth scroll for nav links
+    // Smooth scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -84,6 +90,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Newsletter simulation
+    const newsletterForm = document.getElementById('newsletter-form');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Subscribed successfully!');
+            newsletterForm.reset();
+        });
+    }
+
     // Form simulation
     const contactForm = document.getElementById('contact-form');
     if (contactForm) {
@@ -91,11 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const btn = contactForm.querySelector('button');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">...</svg> Processing...</span>';
+            btn.innerHTML = 'Processing...';
             btn.disabled = true;
-
             setTimeout(() => {
-                alert('Thank you for contacting J & J VETS. We will get back to you shortly.');
+                alert('Thank you for contacting J & J VETS.');
                 btn.innerHTML = originalText;
                 btn.disabled = false;
                 contactForm.reset();
