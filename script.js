@@ -1,35 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Custom Cursor Logic
-    const cursor = document.createElement('div');
-    const follower = document.createElement('div');
-    cursor.className = 'cursor';
-    follower.className = 'cursor-follower';
-    document.body.appendChild(cursor);
-    document.body.appendChild(follower);
+    // 1. Robust Preloader Logic
+    const preloader = document.getElementById('preloader');
+    const removePreloader = () => {
+        if (preloader) {
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+                preloader.style.display = 'none';
+                initGSAP(); // Start animations after preloader is gone
+            }, 500);
+        }
+    };
 
-    document.addEventListener('mousemove', (e) => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-        setTimeout(() => {
-            follower.style.left = e.clientX - 10 + 'px';
-            follower.style.top = e.clientY - 10 + 'px';
-        }, 50);
-    });
+    // Fallback: Remove preloader after 3 seconds anyway
+    setTimeout(removePreloader, 3000);
+    window.addEventListener('load', removePreloader);
 
-    document.querySelectorAll('a, button, input, .accordion-header').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            cursor.style.transform = 'scale(2.5)';
-            cursor.style.backgroundColor = 'rgba(158, 0, 31, 0.2)';
-            follower.style.opacity = '0';
+    // 2. Custom Cursor Logic (Optimized)
+    const cursor = document.querySelector('.cursor');
+    const follower = document.querySelector('.cursor-follower');
+
+    if (cursor && follower) {
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+            follower.style.transform = `translate3d(${e.clientX - 10}px, ${e.clientY - 10}px, 0)`;
         });
-        el.addEventListener('mouseleave', () => {
-            cursor.style.transform = 'scale(1)';
-            cursor.style.backgroundColor = 'transparent';
-            follower.style.opacity = '1';
-        });
-    });
 
-    // 2. Magnetic Buttons
+        document.querySelectorAll('a, button, input, .accordion-header').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform += ' scale(2.5)';
+                cursor.style.backgroundColor = 'rgba(158, 0, 31, 0.2)';
+                follower.style.opacity = '0';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.backgroundColor = 'transparent';
+                follower.style.opacity = '1';
+            });
+        });
+    }
+
+    // 3. Magnetic Buttons (Robust)
     document.querySelectorAll('.magnetic-wrap').forEach(wrap => {
         wrap.addEventListener('mousemove', (e) => {
             const rect = wrap.getBoundingClientRect();
@@ -42,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 3. GSAP Animations (using window.gsap if loaded)
+    // 4. GSAP Animations
     const initGSAP = () => {
         if (typeof gsap !== 'undefined') {
             gsap.from('.hero-reveal', {
@@ -53,24 +62,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 ease: 'power4.out'
             });
 
-            gsap.registerPlugin(ScrollTrigger);
-            gsap.utils.toArray('.reveal').forEach(section => {
-                gsap.from(section, {
-                    scrollTrigger: {
-                        trigger: section,
-                        start: 'top 80%',
-                        toggleActions: 'play none none none'
-                    },
-                    y: 50,
-                    opacity: 0,
-                    duration: 1,
-                    ease: 'power3.out'
+            if (typeof ScrollTrigger !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+                gsap.utils.toArray('.reveal').forEach(section => {
+                    gsap.from(section, {
+                        scrollTrigger: {
+                            trigger: section,
+                            start: 'top 85%',
+                            toggleActions: 'play none none none'
+                        },
+                        y: 50,
+                        opacity: 0,
+                        duration: 1,
+                        ease: 'power3.out'
+                    });
                 });
+            }
+        } else {
+            // Fallback if GSAP fails: show all reveals
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
+            document.querySelectorAll('.hero-reveal').forEach(el => {
+                el.style.opacity = '1';
+                el.style.transform = 'none';
             });
         }
     };
 
-    // 4. Counter Logic
+    // 5. Counter Logic
     const stats = document.querySelectorAll('.stat-number');
     const animateStats = () => {
         stats.forEach(stat => {
@@ -90,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Trigger counters on reveal
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -103,22 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const statsSection = document.querySelector('#home');
     if (statsSection) observer.observe(statsSection);
 
-    // 5. Preloader
-    const preloader = document.getElementById('preloader');
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            if (preloader) {
-                preloader.style.opacity = '0';
-                preloader.style.visibility = 'hidden';
-            }
-            initGSAP();
-        }, 800);
-    });
-
-    // Dark Mode & other logic preserved
+    // Dark Mode Toggle
     const themeToggle = document.getElementById('theme-toggle');
-    const currentTheme = localStorage.getItem('theme');
-    if (currentTheme) document.documentElement.setAttribute('data-theme', currentTheme);
     if (themeToggle) {
         themeToggle.addEventListener('change', (e) => {
             const theme = e.target.checked ? 'dark' : 'light';
@@ -127,12 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Language Switcher simulation
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('lang-active'));
-            btn.classList.add('lang-active');
-            // Logic to change text content could be added here
+    // Scroll reveal fallback (if GSAP not used)
+    const revealOnScroll = () => {
+        document.querySelectorAll('.reveal').forEach(el => {
+            const elementTop = el.getBoundingClientRect().top;
+            if (elementTop < window.innerHeight - 50) el.classList.add('active');
         });
-    });
+    };
+    window.addEventListener('scroll', revealOnScroll);
 });
